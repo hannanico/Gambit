@@ -36,9 +36,9 @@ function formatTime(totalSeconds: number) {
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
-function getUniquePuzzles(storedPacks: Awaited<
-  ReturnType<typeof getDownloadedPuzzlePacks>
->): Puzzle[] {
+function getUniquePuzzles(
+  storedPacks: Awaited<ReturnType<typeof getDownloadedPuzzlePacks>>,
+): Puzzle[] {
   const puzzlesById = new Map<string, Puzzle>();
 
   for (const storedPack of storedPacks) {
@@ -98,15 +98,11 @@ function pickRushPuzzle(
       ? withoutImmediateRepeat
       : poolBeforeRepeats;
 
-  // Puzzle ratings never decrease during a run.
   const atOrAbovePreviousRating =
     minimumRating === null
       ? eligible
       : eligible.filter((puzzle) => puzzle.rating >= minimumRating);
 
-  // At the top of the downloaded rating range, a same-rating puzzle is allowed.
-  // If the remaining pool has no suitable rating, retain the current level
-  // rather than silently selecting an easier puzzle.
   const monotonicPool = atOrAbovePreviousRating.length
     ? atOrAbovePreviousRating
     : eligible.filter((puzzle) => puzzle.rating >= highestRating);
@@ -146,6 +142,8 @@ export function PuzzleRushGame({ variant }: PuzzleRushGameProps) {
   const [bestScore, setBestScore] = useState(0);
   const [secondsLeft, setSecondsLeft] = useState(TIMED_RUSH_SECONDS);
   const [downloadedPackCount, setDownloadedPackCount] = useState(0);
+  const [highestRatingReached, setHighestRatingReached] = useState(0);
+  const [runPuzzlesPlayed, setRunPuzzlesPlayed] = useState(0);
   const [ratingRange, setRatingRange] = useState<{
     minimum: number;
     maximum: number;
@@ -158,6 +156,8 @@ export function PuzzleRushGame({ variant }: PuzzleRushGameProps) {
   const currentPuzzleIdRef = useRef<string | null>(null);
   const currentPuzzleRatingRef = useRef<number | null>(null);
   const nextPuzzleTimeoutRef = useRef<number | null>(null);
+  const highestRatingReachedRef = useRef(0);
+  const runPuzzlesPlayedRef = useRef(0);
 
   const clearPendingTransition = useCallback(() => {
     if (nextPuzzleTimeoutRef.current !== null) {
@@ -245,6 +245,18 @@ export function PuzzleRushGame({ variant }: PuzzleRushGameProps) {
       usedPuzzleIdsRef.current.add(next.id);
       currentPuzzleIdRef.current = next.id;
       currentPuzzleRatingRef.current = next.rating;
+
+      const nextHighestRating = Math.max(
+        highestRatingReachedRef.current,
+        next.rating,
+      );
+      const nextPuzzlesPlayed = runPuzzlesPlayedRef.current + 1;
+
+      highestRatingReachedRef.current = nextHighestRating;
+      runPuzzlesPlayedRef.current = nextPuzzlesPlayed;
+
+      setHighestRatingReached(nextHighestRating);
+      setRunPuzzlesPlayed(nextPuzzlesPlayed);
       setCurrentPuzzle(next);
     },
     [finishGame, puzzles],
@@ -260,10 +272,14 @@ export function PuzzleRushGame({ variant }: PuzzleRushGameProps) {
     usedPuzzleIdsRef.current = new Set();
     currentPuzzleIdRef.current = null;
     currentPuzzleRatingRef.current = null;
+    highestRatingReachedRef.current = 0;
+    runPuzzlesPlayedRef.current = 0;
 
     setScore(0);
     setStrikes(0);
     setSecondsLeft(TIMED_RUSH_SECONDS);
+    setHighestRatingReached(0);
+    setRunPuzzlesPlayed(0);
     setPhase("playing");
 
     const firstPuzzle = pickRushPuzzle(
@@ -271,7 +287,7 @@ export function PuzzleRushGame({ variant }: PuzzleRushGameProps) {
       0,
       usedPuzzleIdsRef.current,
       null,
-      null
+      null,
     );
 
     if (!firstPuzzle) {
@@ -282,6 +298,11 @@ export function PuzzleRushGame({ variant }: PuzzleRushGameProps) {
     usedPuzzleIdsRef.current.add(firstPuzzle.id);
     currentPuzzleIdRef.current = firstPuzzle.id;
     currentPuzzleRatingRef.current = firstPuzzle.rating;
+    highestRatingReachedRef.current = firstPuzzle.rating;
+    runPuzzlesPlayedRef.current = 1;
+
+    setHighestRatingReached(firstPuzzle.rating);
+    setRunPuzzlesPlayed(1);
     setCurrentPuzzle(firstPuzzle);
   }, [clearPendingTransition, puzzles]);
 
@@ -416,6 +437,40 @@ export function PuzzleRushGame({ variant }: PuzzleRushGameProps) {
           {bestScore}
         </p>
 
+        <div className="mt-6 grid grid-cols-2 gap-3 text-left">
+          <div className="rounded-xl bg-white/10 px-4 py-3">
+            <p className="text-[0.65rem] font-black uppercase tracking-[0.14em] text-sky-200">
+              Highest rating
+            </p>
+
+            <p className="mt-1 text-2xl font-black text-white">
+              {highestRatingReached || "—"}
+            </p>
+          </div>
+
+          <div className="rounded-xl bg-white/10 px-4 py-3">
+            <p className="text-[0.65rem] font-black uppercase tracking-[0.14em] text-sky-200">
+              Puzzles played
+            </p>
+
+            <p className="mt-1 text-2xl font-black text-white">
+              {runPuzzlesPlayed}
+            </p>
+          </div>
+
+          <div className="col-span-2 rounded-xl bg-white/10 px-4 py-3">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-[0.65rem] font-black uppercase tracking-[0.14em] text-sky-200">
+                Strikes used
+              </p>
+
+              <p className="text-2xl font-black text-white">
+                {strikes} / {STARTING_STRIKES}
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
           <button
             className="rounded-xl bg-sky-400 px-5 py-3 font-black text-slate-950 transition hover:bg-sky-300"
@@ -439,13 +494,6 @@ export function PuzzleRushGame({ variant }: PuzzleRushGameProps) {
   if (!currentPuzzle) return null;
 
   const remainingStrikes = STARTING_STRIKES - strikes;
-  const currentTargetRating = ratingRange
-    ? getRushTargetRating(
-        score,
-        ratingRange.minimum,
-        ratingRange.maximum,
-      )
-    : null;
 
   return (
     <PuzzlePlayer
@@ -506,13 +554,10 @@ export function PuzzleRushGame({ variant }: PuzzleRushGameProps) {
             </div>
           </div>
 
-          {currentTargetRating !== null && ratingRange ? (
-            <p className="mt-3 rounded-xl bg-sky-50 px-3 py-3 text-xs font-semibold leading-5 text-slate-600">
-              Using{" "}
-              {puzzles.length} puzzles from {downloadedPackCount} downloaded{" "}
-              {downloadedPackCount === 1 ? "pack" : "packs"}.
-            </p>
-          ) : null}
+          <p className="mt-3 rounded-xl bg-sky-50 px-3 py-3 text-xs font-semibold leading-5 text-slate-600">
+            Using {puzzles.length} puzzles from {downloadedPackCount} downloaded{" "}
+            {downloadedPackCount === 1 ? "pack" : "packs"}.
+          </p>
 
           <p className="mt-3 text-sm leading-5 text-slate-600">
             {variant === "timed"
