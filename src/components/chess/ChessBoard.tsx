@@ -52,12 +52,12 @@ export function ChessBoard({
   return (
     <div
       className="
-        relative aspect-square w-full
-        max-w-[min(100%,calc(100dvh-5rem))]
-        overflow-hidden rounded-lg border-4 border-slate-950
-        bg-slate-950 shadow-2xl ring-1 ring-white/30
-        lg:max-w-[min(100%,calc(100dvh-3rem))]
-      "
+  relative aspect-square w-[min(96vw,560px)]
+  max-w-full overflow-hidden rounded-lg border-4 border-slate-950
+  bg-slate-950 shadow-2xl ring-1 ring-white/30
+  sm:w-[min(92vw,620px)]
+  lg:w-full lg:max-w-[min(100%,calc(100dvh-3rem))]
+"
     >
       <div className="grid h-full grid-cols-8">
         {displayRanks.flatMap((rank, rowIndex) =>
@@ -114,6 +114,14 @@ export function ChessBoard({
                     isLightSquare ? "bg-white/28" : "bg-sky-950/38"
                   }`}
                 />
+
+                {isLastMove && !isSelected ? (
+                  <span className="pointer-events-none absolute inset-0 z-[5] ring-inset ring-2 ring-red-600/100" />
+                ) : null}
+
+                {isSelected ? (
+                  <span className="pointer-events-none absolute inset-0 z-[6] bg-blue-300/50" />
+                ) : null}
 
                 {isLegalDestination && !isCapture ? (
                   <span className="pointer-events-none absolute z-10 h-[24%] w-[24%] rounded-full bg-slate-950/45" />

@@ -148,29 +148,31 @@ export function NormalPuzzleGame() {
       }}
       puzzle={currentPuzzle}
       sidebarContent={
-        <div>
+        <div className="text-sm">
           <div className="flex items-end justify-between gap-3">
-            <div>
-              <p className="text-[0.7rem] font-black uppercase tracking-[0.18em] text-sky-700">
+            <div className="min-w-0">
+              <p className="text-[0.65rem] font-black uppercase tracking-[0.16em] text-sky-700 sm:text-[0.7rem] sm:tracking-[0.18em]">
                 Normal mode
               </p>
 
-              <p className="mt-1 text-sm font-semibold leading-5 text-slate-600">
+              <p className="mt-1 text-xs font-semibold leading-4 text-slate-600 sm:text-sm sm:leading-5">
                 Train without a timer or strike limit.
               </p>
             </div>
 
-            <div className="text-right">
-              <p className="text-[0.65rem] font-black uppercase tracking-[0.14em] text-sky-700">
+            <div className="shrink-0 text-right">
+              <p className="text-[0.6rem] font-black uppercase tracking-[0.14em] text-sky-700">
                 Solved
               </p>
 
-              <p className="text-3xl font-black text-slate-950">{solved}</p>
+              <p className="text-2xl font-black text-slate-950 sm:text-3xl">
+                {solved}
+              </p>
             </div>
           </div>
 
           <button
-            className="mt-4 w-full rounded-xl bg-sky-500 px-4 py-3 text-sm font-black text-white transition hover:bg-sky-600"
+            className="mt-3 w-full rounded-xl bg-sky-500 px-4 py-2.5 text-sm font-black text-white transition hover:bg-sky-600 sm:mt-4 sm:py-3"
             onClick={nextPuzzle}
             type="button"
           >
@@ -178,13 +180,13 @@ export function NormalPuzzleGame() {
           </button>
 
           <Link
-            className="mt-2 block w-full rounded-xl border border-sky-300 bg-white px-4 py-3 text-center text-sm font-black text-sky-800 transition hover:bg-sky-50"
+            className="mt-2 block w-full rounded-xl border border-sky-300 bg-white px-4 py-2.5 text-center text-sm font-black text-sky-800 transition hover:bg-sky-50 sm:py-3"
             href="/packs"
           >
             Manage puzzle packs
           </Link>
 
-          <p className="mt-3 text-xs leading-5 text-slate-500">
+          <p className="mt-2.5 text-[0.7rem] leading-4 text-slate-500 sm:mt-3 sm:text-xs sm:leading-5">
             Playing from your downloaded Random Pack.
           </p>
         </div>

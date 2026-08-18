@@ -164,7 +164,7 @@ export function PuzzlePlayer({
       return;
     }
 
-     const chessForOpening = new Chess(puzzle.fen);
+    const chessForOpening = new Chess(puzzle.fen);
     const firstMove = applyUciMove(chessForOpening, moves[0]);
     const playerSide: "w" | "b" = firstMove ? chessForOpening.turn() : chess.turn();
 
@@ -405,115 +405,115 @@ export function PuzzlePlayer({
   const expectedMove = expectedUci ? uciToMove(expectedUci) : null;
 
   return (
-    <section className="mx-auto w-full max-w-[1600px]">
-      <div className="grid items-center gap-4 lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-6">
-        <div className="order-2 flex min-w-0 justify-center lg:order-1">
-          <ChessBoard
-            disabled={isLocked}
-            fen={fen}
-            lastMove={lastMove}
-            legalMoves={legalMoves}
-            onSquareClick={handleSquareClick}
-            orientation={orientation}
-            selectedSquare={selectedSquare}
-          />
+    <section className="mx-auto min-h-[100dvh] w-full max-w-[1600px] px-2 pb-3 sm:px-4 lg:min-h-0">
+  <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_300px] lg:items-center lg:gap-6">
+    <div className="flex min-w-0 justify-center">
+      <ChessBoard
+        disabled={isLocked}
+        fen={fen}
+        lastMove={lastMove}
+        legalMoves={legalMoves}
+        onSquareClick={handleSquareClick}
+        orientation={orientation}
+        selectedSquare={selectedSquare}
+      />
+    </div>
+
+    <aside className="rounded-2xl border border-sky-200 bg-white/95 p-3 shadow-lg backdrop-blur-sm sm:p-4 lg:max-h-[calc(100dvh-3rem)] lg:overflow-y-auto lg:p-5">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="text-[0.6rem] font-black uppercase tracking-[0.16em] text-sky-700">
+            {mode === "learning" ? "Training puzzle" : "Chess puzzle"}
+          </p>
+
+          <h1 className="mt-1 truncate text-lg font-black tracking-tight text-slate-950 sm:text-xl">
+            You play {sideName(playerColor)}
+          </h1>
+
+          <p className="mt-1 text-xs font-semibold text-slate-600 sm:text-sm">
+            Puzzle rating {puzzle.rating}
+          </p>
         </div>
 
-        <aside className="order-1 rounded-2xl border border-sky-200 bg-white/95 p-4 shadow-lg backdrop-blur-sm lg:order-2 lg:max-h-[calc(100dvh-3rem)] lg:overflow-y-auto lg:p-5">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-[0.7rem] font-black uppercase tracking-[0.18em] text-sky-700">
-                {mode === "learning" ? "Training puzzle" : "Chess puzzle"}
-              </p>
-
-              <h1 className="mt-1 text-xl font-black tracking-tight text-slate-950">
-                You play {sideName(playerColor)}
-              </h1>
-
-              <p className="mt-1 text-sm font-semibold text-slate-600">
-                Puzzle rating {puzzle.rating}
-              </p>
-            </div>
-
-            <span
-              className={`shrink-0 rounded-full px-3 py-1 text-xs font-black ${badgeClass}`}
-            >
-              {status === "playing" ? "Your move" : hudStatus}
-            </span>
-          </div>
-
-          <div className="my-4 border-t border-sky-950/10" />
-
-          <div>
-            <p className="text-sm font-black text-sky-800">{hudStatus}</p>
-
-            <p className="mt-1 text-base font-semibold leading-6 text-slate-900">
-              {message}
-            </p>
-          </div>
-
-          {mode === "learning" ? (
-            <div className="mt-5 grid gap-2">
-              {status === "incorrect" ? (
-                <button
-                  className="rounded-xl bg-sky-500 px-4 py-3 text-sm font-black text-white transition hover:bg-sky-600"
-                  onClick={restoreAfterMistake}
-                  type="button"
-                >
-                  Try again
-                </button>
-              ) : null}
-
-              {status === "playing" ? (
-                <button
-                  className="rounded-xl border border-sky-300 bg-white px-4 py-3 text-sm font-black text-sky-800 transition hover:bg-sky-50"
-                  onClick={showHint}
-                  type="button"
-                >
-                  {hintLevel === 0 ? "Hint" : "More specific hint"}
-                </button>
-              ) : null}
-
-              {["playing", "incorrect"].includes(status) ? (
-                <button
-                  className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-700 transition hover:bg-slate-100"
-                  onClick={revealSolution}
-                  type="button"
-                >
-                  Reveal solution
-                </button>
-              ) : null}
-            </div>
-          ) : null}
-
-          {mode === "learning" && status === "playing" && expectedMove ? (
-            <p className="mt-4 rounded-xl bg-sky-50 px-3 py-3 text-xs leading-5 text-slate-600">
-              Hints are optional. The first identifies a piece; the second
-              identifies its destination.
-            </p>
-          ) : null}
-
-          {mode === "strict" && status === "incorrect" ? (
-            <p className="mt-5 rounded-xl bg-red-50 px-3 py-3 text-sm font-semibold leading-6 text-red-800">
-              This puzzle has been recorded as missed. Choose the next puzzle
-              from the panel beside the board.
-            </p>
-          ) : null}
-
-          {status === "solved" ? (
-            <p className="mt-5 rounded-xl bg-emerald-50 px-3 py-3 text-sm font-semibold leading-6 text-emerald-800">
-              Nice work. Select the next puzzle to continue your session.
-            </p>
-          ) : null}
-
-          {sidebarContent ? (
-            <>
-              <div className="my-5 border-t border-sky-950/10" />
-              {sidebarContent}
-            </>
-          ) : null}
-        </aside>
+        <span
+          className={`shrink-0 rounded-full px-2 py-1 text-[0.65rem] font-black sm:px-3 sm:text-xs ${badgeClass}`}
+        >
+          {status === "playing" ? "Your move" : hudStatus}
+        </span>
       </div>
-    </section>
+
+      <div className="my-3 border-t border-sky-950/10 sm:my-4" />
+
+      <div>
+        <p className="text-sm font-black text-sky-800">{hudStatus}</p>
+
+        <p className="mt-1 text-sm font-semibold leading-5 text-slate-900 sm:text-base sm:leading-6">
+          {message}
+        </p>
+      </div>
+
+      {mode === "learning" ? (
+        <div className="mt-3 grid gap-2 sm:mt-5">
+          {status === "incorrect" ? (
+            <button
+              className="rounded-xl bg-sky-500 px-4 py-2.5 text-sm font-black text-white transition hover:bg-sky-600 sm:py-3"
+              onClick={restoreAfterMistake}
+              type="button"
+            >
+              Try again
+            </button>
+          ) : null}
+
+          {status === "playing" ? (
+            <button
+              className="rounded-xl border border-sky-300 bg-white px-4 py-2.5 text-sm font-black text-sky-800 transition hover:bg-sky-50 sm:py-3"
+              onClick={showHint}
+              type="button"
+            >
+              {hintLevel === 0 ? "Hint" : "More specific hint"}
+            </button>
+          ) : null}
+
+          {["playing", "incorrect"].includes(status) ? (
+            <button
+              className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-black text-slate-700 transition hover:bg-slate-100 sm:py-3"
+              onClick={revealSolution}
+              type="button"
+            >
+              Reveal solution
+            </button>
+          ) : null}
+        </div>
+      ) : null}
+
+      {mode === "learning" && status === "playing" && expectedMove ? (
+        <p className="mt-3 rounded-xl bg-sky-50 px-3 py-2.5 text-xs leading-4 text-slate-600 sm:mt-4 sm:py-3 sm:leading-5">
+          Hints are optional. The first identifies a piece; the second
+          identifies its destination.
+        </p>
+      ) : null}
+
+      {mode === "strict" && status === "incorrect" ? (
+        <p className="mt-3 rounded-xl bg-red-50 px-3 py-2.5 text-xs font-semibold leading-5 text-red-800 sm:mt-5 sm:px-3 sm:py-3 sm:text-sm sm:leading-6">
+          This puzzle has been recorded as missed. Choose the next puzzle from
+          the panel beside the board.
+        </p>
+      ) : null}
+
+      {status === "solved" ? (
+        <p className="mt-3 rounded-xl bg-emerald-50 px-3 py-2.5 text-xs font-semibold leading-5 text-emerald-800 sm:mt-5 sm:px-3 sm:py-3 sm:text-sm sm:leading-6">
+          Nice work. Select the next puzzle to continue your session.
+        </p>
+      ) : null}
+
+      {sidebarContent ? (
+        <>
+          <div className="my-3 border-t border-sky-950/10 sm:my-5" />
+          {sidebarContent}
+        </>
+      ) : null}
+    </aside>
+  </div>
+</section>
   );
 }
