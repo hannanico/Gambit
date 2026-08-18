@@ -3,7 +3,7 @@ import { SiteHeader } from "@/components/ui/SiteHeader";
 
 export default function PacksPage() {
   return (
-    <main className="min-h-screen bg-[url('/assets/board/icy_sea.jpg')] bg-cover bg-center text-slate-950">
+    <main className="min-h-screen bg-[url('/assets/board/icy_sea.png')] bg-cover bg-center text-slate-950">
   <SiteHeader />
 
   <div className="bg-sky-50/80 px-4 py-8 backdrop-blur-sm sm:px-8">

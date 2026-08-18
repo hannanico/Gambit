@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function OfflinePage() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[url('/assets/board/icy_sea.jpg')] bg-cover bg-center p-5 text-slate-950">
+    <main className="flex min-h-screen items-center justify-center bg-[url('/assets/board/icy_sea.png')] bg-cover bg-center p-5 text-slate-950">
       <section className="w-full max-w-lg rounded-3xl border border-white/60 bg-white/90 p-8 text-center shadow-2xl backdrop-blur">
         <p className="text-sm font-black uppercase tracking-[0.22em] text-sky-700">
           Gambit

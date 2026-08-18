@@ -5,7 +5,7 @@ import { SiteHeader } from "@/components/ui/SiteHeader";
 
 export default function Home() {
   return (
-    <main className="min-h-screen overflow-hidden bg-[url('/assets/board/icy_sea.jpg')] bg-cover bg-center text-slate-950">
+    <main className="min-h-screen overflow-hidden bg-[url('/assets/board/icy_sea.png')] bg-cover bg-center text-slate-950">
       <SiteHeader />
 
       <section className="relative border-b border-sky-200/70 bg-sky-50/80 px-4 py-16 backdrop-blur-sm sm:px-6 sm:py-24 lg:px-8">

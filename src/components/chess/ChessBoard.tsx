@@ -7,6 +7,9 @@ type ChessBoardProps = {
   fen: string;
   orientation?: "white" | "black";
   selectedSquare?: string | null;
+  lastMove?: { from: string; to: string } | null;
+  legalMoves?: string[];
+  disabled?: boolean;
   onSquareClick?: (square: string) => void;
 };
 
@@ -32,6 +35,9 @@ export function ChessBoard({
   fen,
   orientation = "white",
   selectedSquare,
+  lastMove = null,
+  legalMoves = [],
+  disabled = false,
   onSquareClick,
 }: ChessBoardProps) {
   const chess = useMemo(() => new Chess(fen), [fen]);
@@ -41,21 +47,38 @@ export function ChessBoard({
 
   const displayRanks = orientation === "white" ? ranks : [...ranks].reverse();
   const displayFiles = orientation === "white" ? files : [...files].reverse();
+  const legalDestinations = new Set(legalMoves);
 
   return (
-    <div className="mx-auto aspect-square w-full max-w-160 overflow-hidden rounded-sm border-4 border-slate-950 bg-sky-100 shadow-2xl">
+    <div
+      className="
+        relative aspect-square w-full
+        max-w-[min(100%,calc(100dvh-5rem))]
+        overflow-hidden rounded-lg border-4 border-slate-950
+        bg-slate-950 shadow-2xl ring-1 ring-white/30
+        lg:max-w-[min(100%,calc(100dvh-3rem))]
+      "
+    >
       <div className="grid h-full grid-cols-8">
-        {displayRanks.flatMap((rank) =>
-          displayFiles.map((file) => {
+        {displayRanks.flatMap((rank, rowIndex) =>
+          displayFiles.map((file, columnIndex) => {
             const square = `${file}${rank}`;
-            const rowFromTop = ranks.indexOf(rank);
-            const columnFromLeft = files.indexOf(file);
-            const isLight = (rowFromTop + columnFromLeft) % 2 === 0;
-
             const piece = chess.get(square as Square);
             const pieceKey = piece ? `${piece.color}${piece.type}` : "";
             const imagePath = piece ? `/assets/pieces/${pieceKey}.png` : "";
             const fallback = piece ? fallbackPieces[pieceKey] : "";
+
+            const isSelected = selectedSquare === square;
+            const isLastMove =
+              lastMove?.from === square || lastMove?.to === square;
+            const isLegalDestination = legalDestinations.has(square);
+            const isCapture = isLegalDestination && Boolean(piece);
+
+            const isLightSquare = (rowIndex + columnIndex) % 2 === 0;
+
+            const coordinateColor = isLightSquare
+              ? "text-sky-700"
+              : "text-sky-100";
 
             return (
               <button
@@ -66,21 +89,44 @@ export function ChessBoard({
                       } on ${square}`
                     : square
                 }
-                className={`relative flex aspect-square items-center justify-center transition-colors ${
-                  isLight ? "bg-sky-100" : "bg-sky-500"
-                } ${
-                  selectedSquare === square
-                    ? "ring-inset ring-4 ring-amber-400"
-                    : ""
-                }`}
+                className={[
+                  "relative flex aspect-square items-center justify-center",
+                  "touch-manipulation bg-cover bg-center",
+                  disabled ? "cursor-default" : "cursor-pointer",
+                  isLightSquare ? "bg-sky-50/70" : "bg-sky-900/45",
+                  isSelected ? "bg-amber-300/65" : "",
+                  !isSelected && isLastMove ? "bg-yellow-300/55" : "",
+                ].join(" ")}
+                disabled={disabled}
                 key={square}
                 onClick={() => onSquareClick?.(square)}
+                style={{
+                  backgroundImage: "url('/assets/board/icy_sea.png')",
+                  backgroundSize: "800% 800%",
+                  backgroundPosition: `${(columnIndex / 7) * 100}% ${
+                    (rowIndex / 7) * 100
+                  }%`,
+                }}
                 type="button"
               >
+                <span
+                  className={`pointer-events-none absolute inset-0 ${
+                    isLightSquare ? "bg-white/28" : "bg-sky-950/38"
+                  }`}
+                />
+
+                {isLegalDestination && !isCapture ? (
+                  <span className="pointer-events-none absolute z-10 h-[24%] w-[24%] rounded-full bg-slate-950/45" />
+                ) : null}
+
+                {isCapture ? (
+                  <span className="pointer-events-none absolute z-10 inset-[7%] rounded-full border-[clamp(2px,0.5vw,5px)] border-slate-950/55" />
+                ) : null}
+
                 {piece && !imageFailures[pieceKey] ? (
                   <img
                     alt=""
-                    className="h-[88%] w-[88%] object-contain"
+                    className="relative z-20 h-[88%] w-[88%] object-contain drop-shadow-sm"
                     draggable={false}
                     onError={() =>
                       setImageFailures((current) => ({
@@ -90,11 +136,27 @@ export function ChessBoard({
                     }
                     src={imagePath}
                   />
-                ) : (
-                  <span className="select-none text-[clamp(2rem,8vw,5rem)] leading-none text-slate-950">
+                ) : piece ? (
+                  <span className="relative z-20 select-none text-[clamp(2rem,8vw,5rem)] leading-none text-slate-950">
                     {fallback}
                   </span>
-                )}
+                ) : null}
+
+                {columnIndex === 0 ? (
+                  <span
+                    className={`pointer-events-none absolute left-1 top-0.5 z-30 text-[clamp(0.55rem,1.4vw,0.85rem)] font-black ${coordinateColor}`}
+                  >
+                    {rank}
+                  </span>
+                ) : null}
+
+                {rowIndex === 7 ? (
+                  <span
+                    className={`pointer-events-none absolute bottom-0.5 right-1 z-30 text-[clamp(0.55rem,1.4vw,0.85rem)] font-black ${coordinateColor}`}
+                  >
+                    {file}
+                  </span>
+                ) : null}
               </button>
             );
           }),

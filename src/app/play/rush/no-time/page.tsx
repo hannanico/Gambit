@@ -4,15 +4,20 @@ import { SiteHeader } from "@/components/ui/SiteHeader";
 export default function NoTimeRushPage() {
   return (
     <main className="min-h-screen bg-[url('/assets/board/icy_sea.jpg')] bg-cover bg-center text-slate-950">
-      <SiteHeader />
-      <div className="bg-sky-50/65 px-4 py-8 backdrop-blur-sm sm:px-8">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-6">
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-sky-700">Puzzle Rush</p>
-            <h1 className="mt-1 text-3xl font-black tracking-tight sm:text-4xl">No clock. Three strikes.</h1>
-          </div>
-          <PuzzleRushGame variant="no-time" />
+      <div className="lg:grid lg:h-screen lg:grid-cols-[220px_minmax(0,1fr)] lg:overflow-hidden">
+        <aside className="hidden h-screen border-r border-sky-950/10 bg-sky-50/85 p-5 backdrop-blur-md lg:block">
+          <SiteHeader variant="sidebar" />
+        </aside>
+
+        <div className="lg:hidden">
+          <SiteHeader />
         </div>
+
+        <section className="min-w-0 bg-sky-50/55 p-3 backdrop-blur-sm sm:p-4 lg:flex lg:h-screen lg:items-center lg:overflow-hidden lg:p-3">
+          <div className="mx-auto w-full max-w-none">
+            <PuzzleRushGame variant="no-time" />
+          </div>
+        </section>
       </div>
     </main>
   );
