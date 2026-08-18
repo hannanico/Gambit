@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { InstallGambitButton } from "@/components/pwa/InstallGambitButton";
 
 const links = [
   { href: "/", label: "Home" },
@@ -24,7 +25,9 @@ export function SiteHeader() {
           </span>
         </Link>
 
-        <nav aria-label="Main navigation" className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
+          <InstallGambitButton />
+          <nav aria-label="Main navigation" className="flex items-center gap-1">
           {links.map((link) => {
             const active = pathname === link.href;
 
@@ -44,6 +47,7 @@ export function SiteHeader() {
           })}
         </nav>
       </div>
+    </div>
     </header>
   );
 }

@@ -8,6 +8,7 @@ import {
   savePuzzlePack,
 } from "@/lib/puzzle-storage";
 import type { PuzzleManifest, PuzzlePack } from "@/types/puzzle";
+import { requestPersistentStorage } from "@/lib/storage-health";
 
 type PackStatus = "idle" | "downloading" | "downloaded" | "error";
 
@@ -71,6 +72,7 @@ export function PackManager() {
     try {
       const puzzles = await downloadAndVerifyPack(pack);
       await savePuzzlePack(pack, puzzles);
+      await requestPersistentStorage();
 
       setStatuses((current) => ({ ...current, [pack.id]: "downloaded" }));
       setMessages((current) => ({
