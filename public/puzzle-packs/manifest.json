@@ -1,0 +1,58 @@
+{
+  "packs": [
+    {
+      "id": "random-20k",
+      "file": "random-20k.json",
+      "puzzleCount": 20000,
+      "minRating": 399,
+      "maxRating": 3116,
+      "sizeBytes": 2537934,
+      "sha256": "730f98eae3024ca73bceaa3c9b82fb74087804662460c37004ddb24b69df0bd6"
+    },
+    {
+      "id": "rating-0000-1000",
+      "file": "rating-0000-1000.json",
+      "puzzleCount": 20000,
+      "minRating": 399,
+      "maxRating": 1000,
+      "sizeBytes": 2347938,
+      "sha256": "282e59474997f0561cb9b8e576b59feee2ae9e047a62fcad6d479aef18729e1e"
+    },
+    {
+      "id": "rating-1001-1500",
+      "file": "rating-1001-1500.json",
+      "puzzleCount": 20000,
+      "minRating": 1001,
+      "maxRating": 1500,
+      "sizeBytes": 2468131,
+      "sha256": "7e2b5b45a9c59bf9d2ecd57a678a260a175bcbb93b9fc445ae019fb1198c25c5"
+    },
+    {
+      "id": "rating-1501-2000",
+      "file": "rating-1501-2000.json",
+      "puzzleCount": 20000,
+      "minRating": 1501,
+      "maxRating": 2000,
+      "sizeBytes": 2553301,
+      "sha256": "4db509c558652896781282c2461d3302230e8838b754acc8aa8c1d9db30d91e0"
+    },
+    {
+      "id": "rating-2001-2500",
+      "file": "rating-2001-2500.json",
+      "puzzleCount": 20000,
+      "minRating": 2001,
+      "maxRating": 2500,
+      "sizeBytes": 2616248,
+      "sha256": "f5c512ee6b04b86b59c59fe831d010d54af030e7b68838da04a7d30c2761c38f"
+    },
+    {
+      "id": "rating-2501-plus",
+      "file": "rating-2501-plus.json",
+      "puzzleCount": 20000,
+      "minRating": 2501,
+      "maxRating": 3239,
+      "sizeBytes": 2711609,
+      "sha256": "b3cf58e60ab0bdd15402b70e41477b2952f2c75a84bdd580c0a69bab882ff337"
+    }
+  ]
+}
