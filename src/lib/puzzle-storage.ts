@@ -96,6 +96,25 @@ export async function getDownloadedPackIds(): Promise<string[]> {
   });
 }
 
+export async function getDownloadedPuzzlePacks(): Promise<StoredPuzzlePack[]> {
+  const database = await openDatabase();
+
+  return new Promise((resolve, reject) => {
+    const transaction = database.transaction(PACK_STORE, "readonly");
+    const request = transaction.objectStore(PACK_STORE).getAll();
+
+    request.onsuccess = () => {
+      database.close();
+      resolve(request.result as StoredPuzzlePack[]);
+    };
+
+    request.onerror = () => {
+      database.close();
+      reject(request.error);
+    };
+  });
+}
+
 export async function deletePuzzlePack(packId: string): Promise<void> {
   const database = await openDatabase();
 
