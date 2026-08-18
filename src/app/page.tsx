@@ -13,12 +13,12 @@ export default function Home() {
           <ChessMark
             className="absolute -left-10 bottom-0 h-48 w-48 rotate-[-13deg] opacity-15 sm:h-64 sm:w-64"
             fallback="♞"
-            src="/assets/brand/black-knight.jpg"
+            src="/assets/brand/black-king.png"
           />
           <ChessMark
             className="absolute -right-12 -top-8 h-52 w-52 rotate-12 opacity-15 sm:h-72 sm:w-72"
             fallback="♕"
-            src="/assets/brand/white-crown.jpg"
+            src="/assets/brand/white-king.png"
           />
         </div>
 
@@ -55,16 +55,16 @@ export default function Home() {
 
           <div className="relative mx-auto grid aspect-square w-full max-w-md grid-cols-2 gap-3 rounded-4xl border-8 border-slate-950 bg-sky-500 p-4 shadow-2xl rotate-2">
             <div className="flex items-center justify-center bg-sky-100">
-              <ChessMark className="h-28 w-28" fallback="♕" src="/assets/brand/white-crown.jpg" />
+              <ChessMark className="h-28 w-28" fallback="♕" src="/assets/brand/white-crown.png" />
             </div>
             <div className="flex items-center justify-center bg-sky-700">
-              <ChessMark className="h-28 w-28 invert" fallback="♜" src="/assets/brand/black-rook.jpg" />
+              <ChessMark className="h-28 w-28" fallback="♜" src="/assets/brand/black-rook.png" />
             </div>
             <div className="flex items-center justify-center bg-sky-700">
-              <ChessMark className="h-28 w-28 invert" fallback="♞" src="/assets/brand/black-knight.jpg" />
+              <ChessMark className="h-28 w-28" fallback="♞" src="/assets/brand/black-knight.png" />
             </div>
             <div className="flex items-center justify-center bg-sky-100">
-              <ChessMark className="h-28 w-28" fallback="♗" src="/assets/brand/white-bishop.jpg" />
+              <ChessMark className="h-28 w-28" fallback="♗" src="/assets/brand/white-bishop.png" />
             </div>
           </div>
         </div>
@@ -95,11 +95,11 @@ export default function Home() {
               title="Normal"
             />
             <ModeCard
-              action="View Puzzle Rush"
+              action="Play Puzzle Rush"
               accent="slate"
               description="Solve under pressure. Timed and three-strike variants are coming next."
               eyebrow="Speed"
-              href="/modes"
+              href="/play/rush"
               title="Puzzle Rush"
             />
             <ModeCard

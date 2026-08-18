@@ -10,6 +10,7 @@ type PuzzlePlayerProps = {
   puzzle: Puzzle;
   onSolved?: () => void;
   onIncorrect?: () => void;
+  locked?: boolean;
 };
 
 type PuzzleStatus = "loading" | "playing" | "replying" | "solved" | "incorrect";
@@ -22,16 +23,26 @@ export function PuzzlePlayer({
   puzzle,
   onSolved,
   onIncorrect,
+  locked = false,
 }: PuzzlePlayerProps) {
   const chessRef = useRef(new Chess());
   const movesRef = useRef<string[]>([]);
   const moveIndexRef = useRef(0);
+  const responseTimeoutRef = useRef<number | null>(null);
 
   const [fen, setFen] = useState(puzzle.fen);
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
   const [status, setStatus] = useState<PuzzleStatus>("loading");
   const [message, setMessage] = useState("Loading puzzle...");
   const [playerColor, setPlayerColor] = useState<"w" | "b">("w");
+
+  useEffect(() => {
+    return () => {
+      if (responseTimeoutRef.current !== null) {
+        window.clearTimeout(responseTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const chess = new Chess(puzzle.fen);
@@ -61,23 +72,11 @@ export function PuzzlePlayer({
     }
 
     moveIndexRef.current = 1;
-
-    // After the opening move, it is the user's side to move.
     setPlayerColor(chess.turn());
     setFen(chess.fen());
     setStatus("playing");
     setMessage(`${sideName(chess.turn())} to move — find the best move.`);
   }, [puzzle]);
-
-  function markIncorrect(reason: string) {
-    setSelectedSquare(null);
-    setStatus("incorrect");
-    setMessage(reason);
-
-    window.setTimeout(() => {
-      onIncorrect?.();
-    }, 900);
-  }
 
   function finishSolved() {
     setSelectedSquare(null);
@@ -87,13 +86,19 @@ export function PuzzlePlayer({
     onSolved?.();
   }
 
-  function handleSquareClick(square:string) {
-    if (status !== "playing") return;
+  function markIncorrect(reason: string) {
+    setSelectedSquare(null);
+    setStatus("incorrect");
+    setMessage(reason);
+    onIncorrect?.();
+  }
+
+  function handleSquareClick(square: string) {
+    if (locked || status !== "playing") return;
 
     const chess = chessRef.current;
     const clickedPiece = chess.get(square as Square);
 
-    // First click: only allow selecting a piece belonging to the side to move.
     if (!selectedSquare) {
       if (!clickedPiece) {
         setMessage(`${sideName(playerColor)} to move — select one of your pieces.`);
@@ -110,7 +115,6 @@ export function PuzzlePlayer({
       return;
     }
 
-    // Clicking another friendly piece changes selection rather than submitting a move.
     if (clickedPiece?.color === playerColor) {
       setSelectedSquare(square);
       setMessage(`Selected ${square}. Choose a legal destination.`);
@@ -132,7 +136,6 @@ export function PuzzlePlayer({
 
     const expectedMove = uciToMove(expectedUci);
 
-    // First validate chess legality. Illegal moves should NOT consume a puzzle.
     let legalMove;
     try {
       legalMove = chess.move({
@@ -150,10 +153,7 @@ export function PuzzlePlayer({
       return;
     }
 
-    // The move was legal, but now compare it with the expected puzzle move.
-    const playedUci = `${legalMove.from}${legalMove.to}${
-      legalMove.promotion ?? ""
-    }`;
+    const playedUci = `${legalMove.from}${legalMove.to}${legalMove.promotion ?? ""}`;
 
     if (playedUci !== expectedUci) {
       markIncorrect("That move is legal, but it is not the puzzle solution.");
@@ -166,7 +166,6 @@ export function PuzzlePlayer({
 
     const opponentReply = movesRef.current[moveIndexRef.current];
 
-    // The user's move completed the full solution.
     if (!opponentReply) {
       finishSolved();
       return;
@@ -175,7 +174,9 @@ export function PuzzlePlayer({
     setStatus("replying");
     setMessage(`${sideName(chess.turn())} is responding...`);
 
-    window.setTimeout(() => {
+    responseTimeoutRef.current = window.setTimeout(() => {
+      if (locked) return;
+
       const replyResult = applyUciMove(chess, opponentReply);
 
       if (!replyResult) {
@@ -212,42 +213,29 @@ export function PuzzlePlayer({
     <section className="w-full max-w-2xl">
       <div className="mb-3 flex items-center justify-between gap-3 rounded-xl border border-sky-200 bg-white/90 px-4 py-3 shadow-sm">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-sky-700">
-            Your side
-          </p>
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-sky-700">Your side</p>
           <p className="text-lg font-black text-slate-950">
             {status === "playing" || status === "replying"
               ? `You are ${sideName(playerColor)}`
               : turnText}
           </p>
         </div>
-
-        <div
-          className={`rounded-full px-3 py-1 text-sm font-bold ${
-            status === "playing"
-              ? "bg-emerald-100 text-emerald-800"
-              : status === "replying"
-                ? "bg-amber-100 text-amber-800"
-                : "bg-slate-100 text-slate-700"
-          }`}
-        >
-          {turnText}
+        <div className={`rounded-full px-3 py-1 text-sm font-bold ${
+          status === "playing"
+            ? "bg-emerald-100 text-emerald-800"
+            : status === "replying"
+              ? "bg-amber-100 text-amber-800"
+              : "bg-slate-100 text-slate-700"
+        }`}>
+          {locked ? "Rush ended" : turnText}
         </div>
       </div>
 
-      <ChessBoard
-        fen={fen}
-        onSquareClick={handleSquareClick}
-        selectedSquare={selectedSquare}
-      />
+      <ChessBoard fen={fen} onSquareClick={handleSquareClick} selectedSquare={selectedSquare} />
 
-      <div className="mt-4 flex items-center justify-between rounded-xl border border-sky-200 bg-white/90 px-4 py-3 shadow-sm">
-        <div>
-          <p className="font-semibold text-slate-900">{message}</p>
-          <p className="text-sm text-slate-600">
-            Puzzle rating: {puzzle.rating}
-          </p>
-        </div>
+      <div className="mt-4 rounded-xl border border-sky-200 bg-white/90 px-4 py-3 shadow-sm">
+        <p className="font-semibold text-slate-900">{message}</p>
+        <p className="text-sm text-slate-600">Puzzle rating: {puzzle.rating}</p>
       </div>
     </section>
   );
