@@ -1,3 +1,5 @@
+import { getSoundEnabled, getSoundVolume } from "@/lib/sound-settings";
+
 export type SoundName =
   | "move"
   | "capture"
@@ -18,20 +20,20 @@ const soundPaths: Record<SoundName, string> = {
 const audioCache = new Map<SoundName, HTMLAudioElement>();
 
 export function playSound(sound: SoundName) {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined" || !getSoundEnabled()) return;
 
   let audio = audioCache.get(sound);
 
   if (!audio) {
     audio = new Audio(soundPaths[sound]);
     audio.preload = "auto";
-    audio.volume = 0.4;
     audioCache.set(sound, audio);
   }
 
+  audio.volume = getSoundVolume();
   audio.currentTime = 0;
 
   void audio.play().catch(() => {
-    // Browsers can block sound until the user's first interaction.
+    // Browsers may block sound before the user's first interaction.
   });
 }

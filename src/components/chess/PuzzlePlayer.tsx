@@ -1,10 +1,20 @@
 "use client";
 
 import { Chess, type Move, type Square } from "chess.js";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { ChessBoard } from "@/components/chess/ChessBoard";
 import { applyUciMove, movesFromPuzzle, uciToMove } from "@/lib/chess";
 import { playSound } from "@/lib/sounds";
+import {
+  getSoundEnabled,
+  setSoundEnabled,
+} from "@/lib/sound-settings";  
 import type { Puzzle } from "@/types/puzzle";
 
 type TrainingMode = "strict" | "learning";
@@ -66,6 +76,11 @@ export function PuzzlePlayer({
   const [playerColor, setPlayerColor] = useState<"w" | "b">("w");
   const [mistakeSnapshot, setMistakeSnapshot] = useState<string | null>(null);
   const [hintLevel, setHintLevel] = useState(0);
+  const [soundEnabled, setSoundEnabledState] = useState(true);
+
+  useEffect(() => {
+    setSoundEnabledState(getSoundEnabled());
+  }, []);
 
   const orientation = playerColor === "w" ? "white" : "black";
   const isLocked = locked || !["playing", "incorrect"].includes(status);
@@ -126,6 +141,19 @@ export function PuzzlePlayer({
 
     playSound("move");
   }
+
+  function toggleSound() {
+  const nextEnabled = !soundEnabled;
+
+  setSoundEnabled(nextEnabled);
+  setSoundEnabledState(nextEnabled);
+
+  if (nextEnabled) {
+    window.setTimeout(() => {
+      playSound("move");
+    }, 0);
+  }
+}
 
   function resetSelection() {
     setSelectedSquare(null);
@@ -460,7 +488,7 @@ export function PuzzlePlayer({
                 Puzzle rating {puzzle.rating}
               </p>
             </div>
-
+            
             <span
               className={`shrink-0 rounded-full px-2 py-1 text-[0.65rem] font-black sm:px-3 sm:text-xs ${badgeClass}`}
             >
@@ -518,6 +546,16 @@ export function PuzzlePlayer({
               identifies its destination.
             </p>
           ) : null}
+
+          <button
+            aria-label={soundEnabled ? "Turn sounds off" : "Turn sounds on"}
+            className="mt-3 flex w-full items-center justify-between rounded-xl border border-sky-200 bg-white px-3 py-2.5 text-sm font-black text-sky-800 transition hover:bg-sky-50"
+            onClick={toggleSound}
+            type="button"
+          >
+            <span>Sound effects</span>
+            <span aria-hidden="true">{soundEnabled ? "🔊 On" : "🔇 Off"}</span>
+          </button>
 
           {mode === "strict" && status === "incorrect" ? (
             <p className="mt-3 rounded-xl bg-red-50 px-3 py-2.5 text-xs font-semibold leading-5 text-red-800 sm:mt-5 sm:px-3 sm:py-3 sm:text-sm sm:leading-6">
