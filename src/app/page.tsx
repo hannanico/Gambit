@@ -103,11 +103,11 @@ export default function Home() {
               title="Puzzle Rush"
             />
             <ModeCard
-              action="View Rated mode"
+              action="Play Rated mode"
               accent="amber"
               description="Select a rating range and train against puzzles at your chosen level."
               eyebrow="Focused training"
-              href="/modes"
+              href="/play/rated"
               title="Rated"
             />
           </div>

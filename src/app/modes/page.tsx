@@ -32,11 +32,10 @@ export default function ModesPage() {
             />
             <ModeCard
               accent="amber"
-              action="Coming next"
-              description="Choose a downloaded rating range and practice at a difficulty that fits you."
-              disabled
-              eyebrow="In development"
-              href="/modes"
+              action="Choose rating range"
+              description="Select a downloaded rating pack and solve without a timer or strike limit"
+              eyebrow="Focused training"
+              href="/play/rated"
               title="Rated"
             />
           </div>
