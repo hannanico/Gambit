@@ -3,7 +3,7 @@ import { SiteHeader } from "@/components/ui/SiteHeader";
 
 export default function RatedModePage() {
   return (
-    <main className="min-h-screen bg-[url('/assets/board/icy_sea.jpg')] bg-cover bg-center text-slate-950">
+    <main className="min-h-screen bg-[url('/assets/board/icy_sea.png')] bg-cover bg-center text-slate-950">
       <SiteHeader />
 
       <section className="min-h-[calc(100vh-4rem)] bg-sky-50/85 px-3 py-12 backdrop-blur-sm sm:px-6 lg:px-8">

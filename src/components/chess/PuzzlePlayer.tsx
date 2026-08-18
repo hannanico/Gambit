@@ -154,7 +154,6 @@ export function PuzzlePlayer({
 
     setFen(chess.fen());
     setLastMove(null);
-    setPlayerColor(chess.turn());
     setMistakeSnapshot(null);
     setHintLevel(0);
     resetSelection();
@@ -164,6 +163,12 @@ export function PuzzlePlayer({
       setMessage("This puzzle does not contain enough moves.");
       return;
     }
+
+     const chessForOpening = new Chess(puzzle.fen);
+    const firstMove = applyUciMove(chessForOpening, moves[0]);
+    const playerSide: "w" | "b" = firstMove ? chessForOpening.turn() : chess.turn();
+
+    setPlayerColor(playerSide);
 
     setStatus("opening");
     setMessage(`${sideName(chess.turn())} is making the first move...`);
@@ -178,7 +183,6 @@ export function PuzzlePlayer({
       }
 
       moveIndexRef.current = 1;
-      setPlayerColor(chess.turn());
       setLastMove(toLastMove(result));
       setFen(chess.fen());
       setStatus("playing");
