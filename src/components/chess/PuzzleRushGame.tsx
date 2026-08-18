@@ -107,9 +107,7 @@ function pickRushPuzzle(
     ? atOrAbovePreviousRating
     : eligible.filter((puzzle) => puzzle.rating >= highestRating);
 
-  if (!monotonicPool.length) {
-    return null;
-  }
+  if (!monotonicPool.length) return null;
 
   const withinTargetWindow = monotonicPool.filter(
     (puzzle) =>
@@ -144,10 +142,8 @@ export function PuzzleRushGame({ variant }: PuzzleRushGameProps) {
   const [downloadedPackCount, setDownloadedPackCount] = useState(0);
   const [highestRatingReached, setHighestRatingReached] = useState(0);
   const [runPuzzlesPlayed, setRunPuzzlesPlayed] = useState(0);
-  const [ratingRange, setRatingRange] = useState<{
-    minimum: number;
-    maximum: number;
-  } | null>(null);
+  const [missedPuzzles, setMissedPuzzles] = useState<Puzzle[]>([]);
+  const [reviewPuzzle, setReviewPuzzle] = useState<Puzzle | null>(null);
 
   const phaseRef = useRef<GamePhase>("loading");
   const scoreRef = useRef(0);
@@ -158,6 +154,7 @@ export function PuzzleRushGame({ variant }: PuzzleRushGameProps) {
   const nextPuzzleTimeoutRef = useRef<number | null>(null);
   const highestRatingReachedRef = useRef(0);
   const runPuzzlesPlayedRef = useRef(0);
+  const missedPuzzlesRef = useRef<Puzzle[]>([]);
 
   const clearPendingTransition = useCallback(() => {
     if (nextPuzzleTimeoutRef.current !== null) {
@@ -165,6 +162,21 @@ export function PuzzleRushGame({ variant }: PuzzleRushGameProps) {
       nextPuzzleTimeoutRef.current = null;
     }
   }, []);
+
+  const recordMissedPuzzle = useCallback(() => {
+    if (!currentPuzzle) return;
+
+    const alreadyRecorded = missedPuzzlesRef.current.some(
+      (puzzle) => puzzle.id === currentPuzzle.id,
+    );
+
+    if (alreadyRecorded) return;
+
+    const nextMissedPuzzles = [...missedPuzzlesRef.current, currentPuzzle];
+
+    missedPuzzlesRef.current = nextMissedPuzzles;
+    setMissedPuzzles(nextMissedPuzzles);
+  }, [currentPuzzle]);
 
   useEffect(() => {
     phaseRef.current = phase;
@@ -206,10 +218,6 @@ export function PuzzleRushGame({ variant }: PuzzleRushGameProps) {
 
         setPuzzles(uniquePuzzles);
         setDownloadedPackCount(storedPacks.length);
-        setRatingRange({
-          minimum: uniquePuzzles[0].rating,
-          maximum: uniquePuzzles[uniquePuzzles.length - 1].rating,
-        });
         setPhase("ready");
       } catch {
         setPhase("error");
@@ -274,12 +282,15 @@ export function PuzzleRushGame({ variant }: PuzzleRushGameProps) {
     currentPuzzleRatingRef.current = null;
     highestRatingReachedRef.current = 0;
     runPuzzlesPlayedRef.current = 0;
+    missedPuzzlesRef.current = [];
 
     setScore(0);
     setStrikes(0);
     setSecondsLeft(TIMED_RUSH_SECONDS);
     setHighestRatingReached(0);
     setRunPuzzlesPlayed(0);
+    setMissedPuzzles([]);
+    setReviewPuzzle(null);
     setPhase("playing");
 
     const firstPuzzle = pickRushPuzzle(
@@ -364,6 +375,8 @@ export function PuzzleRushGame({ variant }: PuzzleRushGameProps) {
   const handleIncorrect = useCallback(() => {
     if (phaseRef.current !== "playing") return;
 
+    recordMissedPuzzle();
+
     const nextStrikes = strikesRef.current + 1;
 
     strikesRef.current = nextStrikes;
@@ -375,7 +388,7 @@ export function PuzzleRushGame({ variant }: PuzzleRushGameProps) {
     }
 
     scheduleNextPuzzle(scoreRef.current);
-  }, [scheduleFinishGame, scheduleNextPuzzle]);
+  }, [recordMissedPuzzle, scheduleFinishGame, scheduleNextPuzzle]);
 
   if (phase === "loading" || phase === "ready") {
     return (
@@ -413,6 +426,45 @@ export function PuzzleRushGame({ variant }: PuzzleRushGameProps) {
         Gambit could not read your downloaded puzzle packs. Remove the affected
         pack from the packs page and download it again.
       </div>
+    );
+  }
+
+  if (reviewPuzzle) {
+    return (
+      <PuzzlePlayer
+        key={reviewPuzzle.id}
+        mode="learning"
+        onSolved={() => {
+          const remaining = missedPuzzlesRef.current.filter(
+            (puzzle) => puzzle.id !== reviewPuzzle.id,
+          );
+
+          missedPuzzlesRef.current = remaining;
+          setMissedPuzzles(remaining);
+          setReviewPuzzle(null);
+        }}
+        puzzle={reviewPuzzle}
+        sidebarContent={
+          <div>
+            <p className="text-[0.7rem] font-black uppercase tracking-[0.18em] text-sky-700">
+              Rush review
+            </p>
+
+            <p className="mt-1 text-sm font-semibold leading-5 text-slate-600">
+              Practice a puzzle you missed during this run. Hints and the
+              solution are available.
+            </p>
+
+            <button
+              className="mt-4 w-full rounded-xl border border-sky-300 bg-white px-4 py-3 text-sm font-black text-sky-800 transition hover:bg-sky-50"
+              onClick={() => setReviewPuzzle(null)}
+              type="button"
+            >
+              Back to Rush results
+            </button>
+          </div>
+        }
+      />
     );
   }
 
@@ -469,6 +521,42 @@ export function PuzzleRushGame({ variant }: PuzzleRushGameProps) {
               </p>
             </div>
           </div>
+
+          {missedPuzzles.length > 0 ? (
+            <div className="col-span-2 rounded-xl bg-red-500/10 px-4 py-3">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-[0.65rem] font-black uppercase tracking-[0.14em] text-red-200">
+                    Mistakes to review
+                  </p>
+
+                  <p className="mt-1 text-sm font-semibold text-slate-200">
+                    Tap a puzzle to practice it again.
+                  </p>
+                </div>
+
+                <span className="rounded-full bg-red-500/20 px-2.5 py-1 text-xs font-black text-red-100">
+                  {missedPuzzles.length}
+                </span>
+              </div>
+
+              <div className="mt-3 flex flex-wrap gap-2">
+                {missedPuzzles.map((puzzle) => (
+                  <button
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-red-300/30 bg-red-500/15 px-2.5 py-1.5 text-sm font-black text-red-100 transition hover:bg-red-500/25"
+                    key={puzzle.id}
+                    onClick={() => setReviewPuzzle(puzzle)}
+                    type="button"
+                  >
+                    <span aria-hidden="true" className="text-base leading-none">
+                      ×
+                    </span>
+                    {puzzle.rating}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
         </div>
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
